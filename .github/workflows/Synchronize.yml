@@ -10,45 +10,10 @@ jobs:
   Synchronize:
     runs-on: ubuntu-latest
     steps:
-      - name: '🧰 Checkout'
+      - name: ⏬ Checkout
         uses: actions/checkout@v6
 
-      - name: Check GitHub API
-        run: |
-          printf "which gh=%s\n"      "$(which gh)"
-          printf "gh --version: %s\n" "$(gh --version)"
-          gh help
-
-      - name: Synchronize Repositories
-        run: |
-          set +e
-
-          printf "See: %s\n" "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork"
-          export GH_TOKEN=${{ secrets.GH_TOKEN }}
-
-          targetOrganisation=PLC2
-
-          while IFS=$'\r\n' read -r organisation; do
-            printf "🏭 %s\n" "${organisation}"
-          
-            while IFS=$'\r\n' read -r line; do
-              parent=${line%=*}
-              fork=${line#*=}
-              repo=${fork%:*}
-              branches=${fork#*:}
-              branches=(${branches//,/ })
-
-              printf "  📂 %s ⇒ %s\n" "${parent}" "${repo}"
-              for branch in "${branches[@]}"; do
-                syncCommand="gh repo sync ${targetOrganisation}/${repo} -b ${branch}"
-                messages=$($syncCommand 2>&1)
-                if [[ $? -eq 0 ]]; then
-                  printf "    ✅ %s\n" "${syncCommand}"
-                else
-                  printf "    ❌ %s\n" "${syncCommand}"
-                  printf "%s\n" "$(sed 's/^/    ↪ /g' <<< "${messages}")"
-                  printf "::error title=%s::%s\n" "Synchronize ${targetOrganisation}/${repo}" "${messages}"
-                fi
-              done
-            done < <(cat "${organisation}.repos")
-          done < <(cat ".ALL.repos")
+      - name: 🔄 Synchronize Repositories
+        uses: pyTooling/SynchronizeForks@v1
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
