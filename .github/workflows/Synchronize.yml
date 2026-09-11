@@ -10,10 +10,10 @@ jobs:
   Synchronize:
     runs-on: ubuntu-latest
     steps:
-      - name: '🧰 Checkout'
+      - name: ⏬ Checkout
         uses: actions/checkout@v6
 
-      - name: Synchronize Repositories
+      - name: 🔄 Synchronize Repositories
         uses: pyTooling/SynchronizeForks@v1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
